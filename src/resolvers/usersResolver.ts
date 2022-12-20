@@ -1,5 +1,5 @@
 import usersModel from "../models/UsersSchema";
-import { CreateUser } from "./typings";
+import { CreateUser, UpdateUser } from "./typings";
 import bcrypt, { genSalt } from 'bcrypt';
 
 const UserResolver = {
@@ -39,16 +39,27 @@ const UserResolver = {
         catch(err){
             return {statusCode:500, Error:"Something went wrong."}
         }
+        },
+        SingleUserByEmail: async( _:unknown, args:{email:string}, context:any ) => {
+        try{
+            const user = await usersModel.findOne({email:args.email});
+            if(user){
+                return {user, statusCode:200, message:"Operation successful."};
+            }
+            return {statusCode:404, Error:"User not found."}
+        }
+        catch(err){
+            return {statusCode:500, Error:"Something went wrong."}
+        }
         }
 
     },
     Mutation:{
-        CreateUser: async( _:unknown, args:CreateUser )=>{
+        CreateUser: async( _:unknown, args:CreateUser, context:any  )=>{
             try {
                 const salt = await genSalt();
                 const {email,role,username} = args.input
                 const password = await bcrypt.hash( args.input.password, salt)
-
 
                 const user = await usersModel.findOne({$or:[{email},{username}]}, {password:0, salt:0});
 
@@ -68,7 +79,41 @@ const UserResolver = {
                 return {statusCode:500, Error:"Something went wrong."}
             }
         },
-    //     UpdateUser(input:updateUser!):userReturn!
+        UpdateUser: async( _:unknown, args:UpdateUser, context:any )=>{
+            try {
+                const salt = await genSalt();
+                const {email,role,username} = args.input
+                const password = args.input.password ? await bcrypt.hash( args.input.password, salt) : undefined
+                
+                const user = await usersModel.findOne({_id});
+                if(user){
+                    const updatedUser = await usersModel.updateOne({_id}, {email, role, username, password});
+                    return (updatedUser ? {user:updatedUser, statusCode:200, message:"User Updated Successfully"} : {statusCode:401, Error:"Error updating user."})
+                }
+                return {statusCode:404, Error:"User not found."}
+            }
+            catch (err) {
+                return {statusCode:500, Error:"Something went wrong."}
+            }
+        },
+        DeleteUserById: async( _:unknown, args:deleteUser, context:any )=>{
+            try {
+                const salt = await genSalt();
+                // const _id = args._id
+                const {email,role,username} = args.input
+                const password = args.input.password ? await bcrypt.hash( args.input.password, salt) : undefined
+                
+                const user = await usersModel.findOne({_id});
+                if(user){
+                    const deletedUser = await usersModel.deleteOne({_id}, {email, role, username, password});
+                    return (deletedUser ? {user:deletedUser, statusCode:204, message:"User Updated Successfully"} : {statusCode:401, Error:"Error updating user."})
+                }
+                return {statusCode:404, Error:"User not found."}
+            }
+            catch (err) {
+                return {statusCode:500, Error:"Something went wrong."}
+            }
+        }
     //     DeleteUserById(id:String!):noDataReturn!
     //     DeleteUserByEmail(email:String!):noDataReturn!
 
