@@ -1,4 +1,4 @@
-import usersResolver from "./resolvers/users";
+import usersResolver from "./usersResolver";
 
 
 export default{
