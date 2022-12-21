@@ -11,13 +11,11 @@ mongoose.connect(uri, ()=>{
     console.log("Database connected")
 });
 
-// const server = new ApolloServer({
-//     typeDefs, resolvers,cors:true, context
-// });
-
 const server = new ApolloServer({
-    typeDefs, resolvers
+    typeDefs, resolvers,cors:true, context
 });
+
+
 
 server.listen( port, ()=> {
     console.log(`Server started on port ${port}`);

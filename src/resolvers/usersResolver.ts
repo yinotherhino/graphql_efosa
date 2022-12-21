@@ -48,9 +48,9 @@ const UserResolver = {
         },
         SingleUserByEmail: async( _:unknown, args:{email:string}, context:any ) => {
         try{
-            // if(!context.user){
-            //     return {statusCode:401, Error:"Unauthorized."}
-            // }
+            if(!context.user){
+                return {statusCode:401, Error:"Unauthorized."}
+            }
             const user = await usersModel.findOne({email:args.email});
             if(user){
                 return {user, statusCode:200, message:"Operation successful."};
