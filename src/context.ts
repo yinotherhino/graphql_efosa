@@ -8,9 +8,7 @@ export const context = async({ req }:any) => {
     if(!token){
       throw new GraphQLError("you must be logged in to query this schema")
     }
-    console.log(token)
     const user = jwt.verify(token, accessSecret);
-    console.log(token,user)
 
      if (!user) throw new GraphQLError("you must be logged in to query this schema", {
        extensions: {
