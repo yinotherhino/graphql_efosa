@@ -1,7 +1,6 @@
 import typeDefs from "./typedefs/typedefs"
-import resolvers from "./resolvers";
+import resolvers from "./resolvers/usersResolver";
 import { ApolloServer } from "apollo-server";
-import { startStandaloneServer } from '@apollo/server/standalone';
 
 import {port, uri} from "./config"
 import mongoose from "mongoose";
@@ -17,7 +16,7 @@ mongoose.connect(uri, ()=>{
 // });
 
 const server = new ApolloServer({
-    typeDefs, resolvers,cors:true
+    typeDefs, resolvers
 });
 
 server.listen( port, ()=> {

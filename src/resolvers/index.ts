@@ -5,8 +5,8 @@ export default{
     Query:{
         ...usersResolver.Query
     },
-    Mutation:{
-        ...usersResolver.Mutation
+    // Mutation:{
+    //     ...usersResolver.Mutation
 
-    }
+    // }
 }

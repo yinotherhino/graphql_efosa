@@ -1,6 +1,6 @@
 import {gql} from 'apollo-server'
 
-export default gql`
+const typeDefs = gql`
     type User{
         _id:ID!
         email:String!
@@ -8,17 +8,6 @@ export default gql`
         password:String!
         salt:String
         role:String
-    }
-
-    type userSuccess  {
-        user: User!
-        message: String!
-        statusCode: Int!
-    }
-
-    type failure  {
-        Error: String!
-        statusCode: Int!
     }
 
     type success  {
@@ -57,19 +46,31 @@ export default gql`
     }
 
     type usersSuccess {
-         users:[userReturn]!
-         message: String!
-         statusCode:Int!
-         }
-    
+        users:[User]!
+        message: String!
+        statusCode:Int!
+    }
 
+
+    type userSuccess  {
+        user: User!
+        message: String!
+        statusCode: Int!
+    }
+
+    type failure  {
+        Error: String!
+        statusCode: Int!
+    }
+
+    
     union userReturn = failure | userSuccess
     union usersReturn = failure | usersSuccess
     union noDataReturn = failure | success
 
     type Query{
         AllUsers: usersReturn
-        SingleUserById(id:String!): userReturn!
+        SingleUserById(_id:String!): userReturn!
         SingleUserByEmail(email:String!): userReturn!
     }
     type Mutation{
@@ -80,3 +81,4 @@ export default gql`
     }
 `
 
+export default typeDefs 

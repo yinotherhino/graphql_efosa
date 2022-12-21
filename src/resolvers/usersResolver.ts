@@ -2,17 +2,9 @@ import usersModel from "../models/UsersSchema";
 import { CreateUser, UpdateUser } from "./typings";
 import bcrypt, { genSalt } from 'bcrypt';
 
-interface MyContext {
-    user: {
-        email:string;
-        username: string;
-        _id: string;
-        role: string;
-    }
-}
 const UserResolver = {
     userReturn: {
-        __resolveType: (obj:any) => {
+        __resolveType: (obj:any, contextValue:any, info:any) => {
             if(obj.user){
                 return "userSuccess"
             }
@@ -56,9 +48,9 @@ const UserResolver = {
         },
         SingleUserByEmail: async( _:unknown, args:{email:string}, context:any ) => {
         try{
-            if(!context.user){
-                return {statusCode:401, Error:"Unauthorized."}
-            }
+            // if(!context.user){
+            //     return {statusCode:401, Error:"Unauthorized."}
+            // }
             const user = await usersModel.findOne({email:args.email});
             if(user){
                 return {user, statusCode:200, message:"Operation successful."};
