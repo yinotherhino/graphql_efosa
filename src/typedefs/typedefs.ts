@@ -33,6 +33,13 @@ export default gql`
         role:String
     }
 
+    input updateUser{
+        email:String
+        username:String
+        password:String
+        role:String
+    }
+
     input updateUserByEmail{
         email:String!
         _id:String
@@ -48,14 +55,20 @@ export default gql`
         password:String
         role:String
     }
+
+    type usersSuccess {
+         users:[userReturn]!
+         message: String!
+         statusCode:Int!
+         }
     
 
     union userReturn = failure | userSuccess
-    union usersReturn = failure | [userSuccess!]
+    union usersReturn = failure | usersSuccess
     union noDataReturn = failure | success
 
     type Query{
-        AllUsers: [userReturn]!
+        AllUsers: usersReturn
         SingleUserById(id:String!): userReturn!
         SingleUserByEmail(email:String!): userReturn!
     }

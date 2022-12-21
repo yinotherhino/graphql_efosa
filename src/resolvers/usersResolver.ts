@@ -2,6 +2,14 @@ import usersModel from "../models/UsersSchema";
 import { CreateUser, UpdateUser } from "./typings";
 import bcrypt, { genSalt } from 'bcrypt';
 
+interface MyContext {
+    user: {
+        email:string;
+        username: string;
+        _id: string;
+        role: string;
+    }
+}
 const UserResolver = {
     userReturn: {
         __resolveType: (obj:any) => {
@@ -17,9 +25,12 @@ const UserResolver = {
     Query:{
         AllUsers: async( _:unknown, args:unknown, context:any )=>{
             try{
+                if(!context.user){
+                    return {statusCode:401, Error:"Unauthorized."}
+                }
                 const users = await usersModel.find({});
                 if(users){
-                    return users;
+                    return {users:users, statusCode:200, message:"Operation Successful"};
                 }
                 return {statusCode:404, Error:"No users found."}
   
@@ -30,6 +41,9 @@ const UserResolver = {
         },
         SingleUserById: async( _:unknown, args:{_id:string}, context:any ) => {
         try{
+            if(!context.user){
+                return {statusCode:401, Error:"Unauthorized."}
+            }
             const user = await usersModel.findOne({_id:args._id});
             if(user){
                 return {user, statusCode:200, message:"Operation successful."};
@@ -42,6 +56,9 @@ const UserResolver = {
         },
         SingleUserByEmail: async( _:unknown, args:{email:string}, context:any ) => {
         try{
+            if(!context.user){
+                return {statusCode:401, Error:"Unauthorized."}
+            }
             const user = await usersModel.findOne({email:args.email});
             if(user){
                 return {user, statusCode:200, message:"Operation successful."};
@@ -55,8 +72,11 @@ const UserResolver = {
 
     },
     Mutation:{
-        CreateUser: async( _:unknown, args:CreateUser, context:any  )=>{
+        CreateUser: async( _:unknown, args:CreateUser, context:{user:any}  )=>{
             try {
+                if(!context.user){
+                    return {statusCode:401, Error:"Unauthorized."}
+                }
                 const salt = await genSalt();
                 const {email,role,username} = args.input
                 const password = await bcrypt.hash( args.input.password, salt)
@@ -82,6 +102,7 @@ const UserResolver = {
         UpdateUser: async( _:unknown, args:UpdateUser, context:any )=>{
             try {
                 const salt = await genSalt();
+                const _id= "weytdfghdjsk";
                 const {email,role,username} = args.input
                 const password = args.input.password ? await bcrypt.hash( args.input.password, salt) : undefined
                 
@@ -96,17 +117,31 @@ const UserResolver = {
                 return {statusCode:500, Error:"Something went wrong."}
             }
         },
-        DeleteUserById: async( _:unknown, args:deleteUser, context:any )=>{
+        DeleteUserById: async( _:unknown, args:{_id:string}, context:any )=>{
             try {
                 const salt = await genSalt();
-                // const _id = args._id
-                const {email,role,username} = args.input
-                const password = args.input.password ? await bcrypt.hash( args.input.password, salt) : undefined
+                const _id = args._id
                 
                 const user = await usersModel.findOne({_id});
                 if(user){
-                    const deletedUser = await usersModel.deleteOne({_id}, {email, role, username, password});
-                    return (deletedUser ? {user:deletedUser, statusCode:204, message:"User Updated Successfully"} : {statusCode:401, Error:"Error updating user."})
+                    const deletedUser = await usersModel.deleteOne({_id});
+                    return (deletedUser ? {statusCode:204, message:"User Updated Successfully"} : {statusCode:401, Error:"Error updating user."})
+                }
+                return {statusCode:404, Error:"User not found."}
+            }
+            catch (err) {
+                return {statusCode:500, Error:"Something went wrong."}
+            }
+        },
+        DeleteUserByEmail: async( _:unknown, args:{email:string}, context:any )=>{
+            try {
+                const salt = await genSalt();
+                const email = args.email
+                
+                const user = await usersModel.findOne({email});
+                if(user){
+                    const deletedUser = await usersModel.deleteOne({email});
+                    return (deletedUser ? {statusCode:204, message:"User Updated Successfully"} : {statusCode:401, Error:"Error updating user."})
                 }
                 return {statusCode:404, Error:"User not found."}
             }
@@ -114,8 +149,6 @@ const UserResolver = {
                 return {statusCode:500, Error:"Something went wrong."}
             }
         }
-    //     DeleteUserById(id:String!):noDataReturn!
-    //     DeleteUserByEmail(email:String!):noDataReturn!
 
     }
 }

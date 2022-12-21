@@ -19,14 +19,3 @@ export interface UserUpdate{
 export interface UpdateUser{
     input:UserUpdate
 }
-
-export interface UserUpdate{
-    email?: string;
-    username?: string;
-    password?: string;
-    role?:string;
-}
-
-export interface UpdateUser{
-    input:UserUpdate
-}
